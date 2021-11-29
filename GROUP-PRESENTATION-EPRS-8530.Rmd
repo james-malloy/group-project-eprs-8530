@@ -1,0 +1,809 @@
+---
+title: "U.S. trends in self-rated physical & mental health"
+subtitle: "A time series analysis"
+author: "Patrice Powell & James Malloy"
+institute: "Georgia State University"
+date: "December 2, 2021"
+output:
+  xaringan::moon_reader:
+    css: 
+      - default
+      - css/nhsr.css
+      - css/nhsr-fonts.css
+    lib_dir: libs
+    seal: false
+    nature:
+      highlightStyle: googlecode
+      highlightLines: true
+      highlightLanguage: ["r"]
+      countIncrementalSlides: false
+      ratio: "16:9"
+editor_options: 
+  chunk_output_type: inline
+---
+```{r setup, include = FALSE, echo= FALSE, message=FALSE, warning=FALSE}
+library(knitr)
+library(tidyverse)
+library(NHSRtheme) # slide template comes from here
+library(haven)
+library(broom)
+library(kableExtra) # makes data frames tidy when you knit
+library(DT) # datatable package
+library(gt) # grammar of tables package
+library(xaringanExtra)
+library(psych)
+library(ggridges)
+xaringanExtra::use_panelset()
+
+# set default options
+opts_chunk$set(echo = FALSE,
+               fig.width = 6,
+               fig.height = 3,
+               dpi = 300)
+
+# uncomment the following lines if you want to use the NHS-R theme colors by default
+scale_fill_continuous <- partial(scale_fill_nhs, discrete = FALSE)
+scale_fill_discrete <- partial(scale_fill_nhs, discrete = TRUE)
+scale_colour_continuous <- partial(scale_colour_nhs, discrete = FALSE)
+scale_colour_discrete <- partial(scale_colour_nhs, discrete = TRUE)
+
+theme_update(plot.title = element_text(hjust = 0.5)) # centers plot titles
+theme_update(plot.subtitle = element_text(hjust = 0.5)) # centers subtitles
+
+gss21_raw <- read_stata("data/gss21.dta") 
+
+gss21 <- gss21_raw%>% 
+  select(id, year, sex, hlthmntl, hlthphys) %>% 
+  na.omit(hlthphys)
+
+gss18_raw <- read_stata("data/gss18.dta") 
+
+gss18 <- gss18_raw%>% 
+  select(id, year, sex, hlthmntl, hlthphys) %>% 
+  na.omit(hlthphys)
+
+gss_merged <- rbind(gss18, gss21) %>% 
+  mutate(year = as.factor(year)) %>%       # Make year be numeric
+  mutate(mental_health =                   # Create new variable `mental_health`
+           as.numeric(                     # Make `mental_health numeric
+             ifelse(hlthmntl == 1, 5,      # Reverse code `mental_health`
+                    ifelse(hlthmntl == 2, 4,
+                           ifelse(hlthmntl == 3, 3,
+                                  ifelse(hlthmntl == 4, 2, 
+                                         ifelse(hlthmntl == 5, 1, ""
+                                         ))))))) %>% 
+  mutate(physical_health = 
+           as.numeric(
+             ifelse(hlthphys == 1, 5,
+                    ifelse(hlthphys == 2, 4,
+                           ifelse(hlthphys == 3, 3,
+                                  ifelse(hlthphys == 4, 2, 
+                                         ifelse(hlthphys == 5, 1, ""
+                                         )))))))
+
+
+gss18_correlations <- read_stata("data/gss18.dta") %>% 
+  select(id, year, sex, hlthmntl, hlthphys, educ, rincom16, race, race6)%>% 
+  mutate(rincom16_int = as.integer(rincom16)) %>% 
+  mutate(year = as.factor(year)) %>%       # Make year be numeric
+  mutate(mental_health =                   # Create new variable `mental_health`
+           as.integer(                     # Make `mental_health numeric
+             ifelse(hlthmntl == 1, 5,      # Reverse code `mental_health`
+                    ifelse(hlthmntl == 2, 4,
+                           ifelse(hlthmntl == 3, 3,
+                                  ifelse(hlthmntl == 4, 2, 
+                                         ifelse(hlthmntl == 5, 1, ""
+                                         ))))))) %>% 
+  mutate(physical_health = 
+           as.integer(
+             ifelse(hlthphys == 1, 5,
+                    ifelse(hlthphys == 2, 4,
+                           ifelse(hlthphys == 3, 3,
+                                  ifelse(hlthphys == 4, 2, 
+                                         ifelse(hlthphys == 5, 1, ""
+                                         ))))))) %>% 
+  na.omit() %>% 
+  zap_labels()
+
+# summarize health by year
+health_by_year <- gss_merged %>%
+  group_by(year) %>% 
+  summarize(avg_phys_health = mean(physical_health),
+            sd_phys_health = sd(physical_health),
+            avg_mntl_health = mean (mental_health),
+            sd_mntl_health = sd(mental_health)) %>% 
+  mutate(mental_health = "mental health",
+         physical_health = "physical health",
+         yeargroup = ifelse(year == "2018", "2018","2021"))
+```
+
+class: title-slide, left, bottom
+
+# `r rmarkdown::metadata$title`
+----
+## **`r rmarkdown::metadata$subtitle`**
+### `r rmarkdown::metadata$author`
+### `r rmarkdown::metadata$date`
+
+---
+class: inverse, center, middle
+
+# Field: Health research
+
+## Topic: Self-rated health
+
+---
+
+# Self-rated health
+
+.pull-left[
+
+### What is it?
+
+Self-rated health refers the question in which participants assess different dimensions of their own health; it is commonly used in health research.
+
+]
+
+.pull-right[
+
+
+### Example
+
+#### On a scale from 1-5, how would you rate your physical (or mental) health?
+
+1. Poor
+
+2. Fair
+
+3. Good
+
+4. Very Good
+
+5. Excellent
+
+]
+
+---
+class: inverse, center, middle
+
+# Why is it important?
+
+---
+# Relevance
+
+<!-- start of panel set -->
+
+.panelset[
+
+.panel[.panel-name[Relevance: Mortality]
+
+.pull-left[
+
+![](img/mortality article.png)
+
+]
+
+.pull-right[
+
+<html style="height: 100%;"><head><meta name="viewport" content="width=device-width, minimum-scale=0.1"><title>41598_2020_61603_Fig1_HTML.png (997×701)</title><style type="text/css"></style></head><body style="margin: 0px; background: #0e0e0e; height: 100%"><img style="-webkit-user-select: none;margin: auto;cursor: zoom-in;background-color: hsl(0, 0%, 90%);transition: background-color 300ms;" src="https://media.springernature.com/full/springer-static/image/art%3A10.1038%2Fs41598-020-61603-0/MediaObjects/41598_2020_61603_Fig1_HTML.png?as=webp" width="600" height="350"><iframe id="zotero-modal-prompt" src="chrome-extension://ekhagklcjbdpajgpjgmbionohlpdbjgc/modalPrompt/modalPrompt.html" style="position: fixed; top: 0px; left: unset; right: 0px; width: 50%; height: 50%; border: none; display: none; z-index: 2147483647;"></iframe></body></html>
+
+]
+
+]<!-- end-of-panel -->
+.panel[.panel-name[Relevance: Education]
+
+.pull-left[
+
+```{r educ-mental-health-cor, warning=FALSE, echo=FALSE, message=FALSE, fig.height=3, fig.width=3.5}
+
+ggplot(gss18_correlations, aes(y = educ, 
+                               x = as.factor(mental_health), 
+                               color = mental_health)) +
+  geom_point(position = position_jitter(width = .2, seed = 1234), 
+             alpha = 0.5) +
+  geom_smooth(method = "lm") +
+  scale_x_discrete(labels=c("1" = "Poor", 
+                            "2" = "Fair",
+                            "3" = "Good", 
+                            "4" = "Very good", 
+                            "5"= "Excellent")) +
+  scale_y_continuous(breaks=c(8, 12, 16, 20), limits = c(8,20)) +
+  theme(axis.text.x = element_text(angle=45, face = "bold"), 
+        legend.position = "none") +
+  labs(x = "Mental health",
+       y = "Education",
+       subtitle = "GSS 2018")
+  
+
+```
+
+]
+
+.pull-right[
+
+```{r cor-educ}
+
+tidy(
+  cor.test(gss18_correlations$educ, gss18_correlations$mental_health)) %>% 
+  kbl(caption = "Correlation: Education ~ Mental Health", digits = 2) %>% 
+  kable_styling(bootstrap_options = "striped", full_width = FALSE)
+```
+
+]
+
+]<!-- end-of-panel -->
+.panel[.panel-name[Relevance: Income]
+
+.pull-left[
+
+```{r income-mental-health-correlation, warning=FALSE, message=FALSE, echo=FALSE, fig.height=3, fig.width=3.5}
+
+ggplot(gss18_correlations, aes(y = rincom16_int, 
+                               x = as.factor(physical_health), 
+                               color = physical_health)) +
+  geom_point(position = position_jitter(width = .25, seed = 1234), alpha = 0.5) +
+  geom_smooth(method = "lm", ) +
+  scale_x_discrete(labels=c("1" = "Poor", 
+                            "2" = "Fair",
+                            "3" = "Good", 
+                            "4" = "Very good", 
+                            "5"= "Excellent")) +
+  scale_y_discrete(labels=c("1" = 1000,
+                            "10" = 25000,
+                            "20" = 65000)) +
+  theme(axis.text.x = element_text(angle=45, face= "bold"), 
+        legend.position = "none") +
+  labs(x = "Physical health",
+       y = "Income",
+       subtitle = "GSS 2018")
+
+```
+
+]
+
+.pull-right[
+
+```{r cor-income}
+
+tidy(
+  cor.test(gss18_correlations$rincom16, gss18_correlations$physical_health)) %>% 
+  kbl(caption = "Correlation: Income ~ Physical health", digits = 2) %>% 
+  kable_styling(bootstrap_options = "striped", full_width = FALSE, latex_options = "scale_down")
+
+```
+
+]
+
+]<!-- end-of-panel -->
+.panel[.panel-name[Relevance: Race]
+
+```{r}
+mental_health_by_race <- gss18_correlations %>% 
+  group_by(race6) %>% 
+  summarize(mean_mental_health = mean(mental_health),
+            mean_physical_health = mean(physical_health))
+``` 
+
+.center[
+
+### GSS 2018 Mental health by race
+
+```{r mental-health-by-race, fig.height=2.25, fig.width=3.75, dpi=200}
+
+ggplot(mental_health_by_race, aes(y = mean_mental_health, 
+                               x = as.factor(race6), 
+                               color = race6)) +
+  geom_point(size = 3, position = position_jitter(seed=1234, width = .15)) +
+  scale_x_discrete(labels=c("1" = "White", 
+                            "2" = "Black",
+                            "3" = "American Indian", 
+                            "4" = "Asian", 
+                            "5"= "Native Hawaiian")) +
+  theme(axis.text.x = element_text(angle=25), 
+        legend.position = "none") +
+  labs(x = NULL,
+       y = "Mental Health") +
+  ylim(3.4, 3.8)
+
+```
+
+]
+
+]<!-- end of panel -->
+]
+
+---
+class: inverse, top
+
+# What's the takeaway from all that?
+
+
+--
+
+
+.left[
+
+
+### If you ask people to self-rate their health (poor, fair, good, etc)...
+
+
+]
+
+
+--
+
+
+.right[
+
+
+### then you can "predict" things like their health, income, and even mortality
+
+
+]
+
+--
+
+.center[
+
+
+### and if you can predict who is likely to have  poor health, low-income, or early mortality
+
+
+]
+
+
+
+--
+
+.center[
+
+# **then we can do something beforehand to prevent it!!!!**
+
+]
+
+---
+
+# Physical health
+
+.pull-left[
+
+### In the GSS 2018, respondents (n = 2328) were asked... 
+
+#### "In general, how would you rate your <u>physical health</u>?"
+
+**5. Excellent**
+
+**4. Very good**
+
+**3. Good**
+
+**2. Fair**
+
+**1. Poor**
+
+]
+
+--
+
+.pull-right[
+
+```{r physical-health-2018, echo=FALSE, fig.height=3, fig.width=4, dpi=700}
+# ggplot(health_by_year, aes(x = year, 
+#                            y = avg_phys_health,
+#                            color = physical_health,
+#                            group = physical_health)) +
+#   annotate("point", x = 2018, y = 3.335481, size = 2, color = "red") +
+#   xlim(2017, 2021) +
+#   ylim(3.25, 3.4) +
+#   labs(y = "Physical health")
+
+ggplot(filter(gss_merged, year == 2018), aes(x = physical_health)) +
+  geom_bar(fill = "blue") +
+  geom_vline(xintercept = 3.34, size = 1.5) +
+  labs(subtitle = "GSS 2018",
+       xlab = "")
+```
+
+**M** = 3.34
+
+**SD** = 1.08
+
+]
+
+---
+
+# Mental health
+
+.pull-left[
+
+### In the GSS 2018, respondents (n = 2328) were asked... 
+
+#### "In general, how would you rate your <u>mental health</u>?"
+
+**5. Excellent**
+
+**4. Very good**
+
+**3. Good**
+
+**2. Fair**
+
+**1. Poor**
+
+]
+
+--
+
+.pull-right[
+
+```{r mental-health-18, echo=FALSE, fig.height=3, fig.width=4, dpi=700}
+# ggplot(health_by_year, aes(x = year, 
+#                            y = avg_phys_health,
+#                            color = physical_health,
+#                            group = physical_health,
+#                            label = value)) +
+#   annotate("point", x = 2018, y = 3.661942, size = 2, color = "blue") +
+#   xlim(2017, 2021) +
+#   ylim(3.60, 3.70) +
+#   labs(y = "Mental health")
+
+
+
+ggplot(filter(gss_merged, year == 2018), aes(x = mental_health)) +
+  geom_bar(fill = "red") +
+  geom_vline(xintercept = 3.66, size = 1.5) +
+  labs(subtitle = "GSS 2018",
+       xlab = "")
+
+```
+
+```{r echo=FALSE, fig.show='hide'}
+# describe(x = filter(gss_merged )) when you're not sleepy find Heiss' example of filtering data. Need to filter year == 2021
+
+
+```
+
+**M** = 3.66
+
+**SD** = .97
+
+]
+
+---
+
+class: inverse, center, middle
+
+#Research Question 
+
+## Is there a difference in the U.S. national self-rated physical and mental health averages in 2018 vs 2020?
+
+---
+
+class: center
+
+# Graphic representation
+
+<!-- start of panel -->
+.panelset[
+
+.panel[.panel-name[Physical '18]
+  
+```{r physical-health-201, fig.height=2.25, fig.width=3.75, dpi=200}
+ggplot(health_by_year, aes(x = year, 
+                           y = avg_phys_health,
+                           color = physical_health,
+                           group = physical_health)) +
+  annotate("point", x = 2018, y = 3.335481, size = 2, color = "red") +
+  xlim(2017, 2021)+
+  ylim(3.25, 3.4) +
+  labs(y = "Average")
+```
+
+] <!-- end of panel -->
+.panel[.panel-name[Physical '21]
+
+```{r physical-health-2, fig.height=2.25, fig.width=3.75, dpi=200}
+
+ggplot(health_by_year, aes(x = year, 
+                           y = avg_phys_health, 
+                           color = physical_health,
+                           group = physical_health,
+                           label = avg_phys_health)) +
+  geom_point(size = 2, color = "red") +
+  geom_line(color = "red") +
+  ylim(3.25, 3.4) +
+  labs(y = "Average")
+```
+
+] <!-- end of panel -->
+.panel[.panel-name[Mental '18]
+
+```{r mental-health-1, fig.height=2.25, fig.width=3.75, dpi=200}
+ggplot(health_by_year, aes(x = year, 
+                           y = avg_phys_health,
+                           color = physical_health,
+                           group = physical_health)) +
+  annotate("point", x = 2018, y = 3.661942, size = 2, color = "blue") +
+  xlim(2017, 2021) +
+  ylim(3,4) +
+  labs(y = "Average")
+
+```
+
+] <!-- end of panel -->
+.panel[.panel-name[Mental '21]
+
+```{r mental-health-2, fig.height=2.25, fig.width=3.75, dpi=200}
+ggplot(health_by_year, aes(x = year, 
+                           y = avg_mntl_health, 
+                           color = mental_health,
+                           group = mental_health,
+                           label = avg_mntl_health)) +
+  geom_point(size = 2, color = "blue") +
+  geom_line(color = "blue") +
+  ylim(3, 4) +
+  labs(y = "Average") 
+  
+
+```
+
+] <!-- end of panel -->
+.panel[.panel-name[Physical & Mental 18-21]
+
+```{r full-plot, echo=FALSE, message=FALSE , fig.height=2.25, fig.width=3.75, dpi=200}
+
+ggplot(health_by_year, aes(x = year, 
+                           y = avg_mntl_health, 
+                           color = mental_health,
+                           group = yeargroup)) +
+  annotate("point", x = 2018, y = 3.661942, size = 2, color = "blue" ) +
+  annotate("point", x = 2021, y = 3.484899, size = 2, color = "blue") +
+  annotate("point", x = 2018, y = 3.335481, size = 2, color = "red") +
+  annotate("point", x = 2021, y = 3.327515, size = 2, color = "red") +
+  annotate("segment", x = 2018, xend = 2021, y = 3.661942, yend = 3.484899, color = "blue") +
+  annotate("segment", x = 2018, xend = 2021, y = 3.335481, yend = 3.327515, color = "red") +
+  scale_x_discrete(labels=c("2018","2021")) +  ## trying to add 2021 to tick label, not working
+  geom_vline(xintercept = 2019.5, ) +
+  xlim(2016, 2023) +
+  ylim(3, 4) +
+  labs(y = "Average")
+
+```
+
+]<!-- end of panel -->
+]
+
+---
+class: inverse, center, middle
+
+# Is this statistically significant??
+
+---
+
+# Methods
+
+<!-- start of panel set -->
+
+.panelset[
+
+.panel[.panel-name[Levene's Test]
+
+
+] <!-- end of panel -->
+.panel[.panel-name[Statistical method]
+
+### **Independent samples ttest**
+
+* Ttest (comparing averages)
+
+* Independent observations
+
+] <!-- end of panel -->
+.panel[.panel-name[Variable definition]
+
+### **Independent variable**
+
+* year (nominal)
+
+### **Dependent variables**
+
+* physical health (interval)
+
+* mental health (interval)
+
+]<!-- end of panel -->
+
+.panel[.panel-name[Data cleaning]
+
+### **Merge**
+
+* Make 2018 & 2021 GSS into one dataset
+
+### **Reverse code**
+
+* 1 (excellent) --> 5
+* 2 (very good) --> 4
+* 3 (good) --> 3
+* 4 (fair) --> 2
+* 5 (poor) --> 1
+
+] <!-- end of panel -->
+.panel[.panel-name[Hypothesis testing]
+
+H_0: \mu_1 - \mu_2 = 0
+
+**Null hypothesis**: There is no difference in mean averages in 2018 and 2021.
+
+H_1: \mu_1 - \mu_2 \neq 0
+
+**Alternate hypothesis**: There is a difference in mean averages in 2018 and 2021
+
+**alpha level**: 0.05
+
+**type**: two-tailed
+
+
+] <!-- end of panel -->
+
+]
+
+---
+class: inverse, center, middle
+
+# Findings
+
+---
+
+# Findings: mental health
+
+.center[
+
+```{r findings-mental, echo=FALSE, warning=FALSE, message=FALSE}
+
+tidy(t.test(mental_health ~ year, data = gss_merged)) %>% 
+  kable(digits = 2, format = "html")
+
+```
+
+
+```{r mental-health-23, fig.height=2.15, fig.width=3.65, dpi=200, echo=FALSE}
+ggplot(health_by_year, aes(x = year, 
+                           y = avg_mntl_health, 
+                           color = mental_health,
+                           group = mental_health,
+                           label = avg_mntl_health)) +
+  geom_point(size = 2, color = "blue") +
+  geom_line(color = "blue") +
+  ylim(3, 4) +
+  labs(y = "Average") 
+  
+```
+
+]
+
+---
+
+# Findings: physical health
+
+.center[
+
+```{r findings-physical, echo=FALSE, warning=FALSE, message=TRUE}
+
+tidy(t.test(physical_health ~ year, data = gss_merged)) %>% 
+  kable(digits = 2, format = "html")
+```
+
+
+```{r physical-health-22, fig.height=2.15, fig.width=3.65, dpi=200, echo=FALSE}
+
+ggplot(health_by_year, aes(x = year, 
+                           y = avg_phys_health, 
+                           color = physical_health,
+                           group = physical_health,
+                           label = avg_phys_health)) +
+  geom_point(size = 2, color = "red") +
+  geom_line(color = "red") +
+  ylim(3.25, 3.4) +
+  labs(y = "Average")
+```
+
+]
+---
+
+class: inverse, center, middle
+
+# Conclusions
+
+---
+
+# Conclusions
+
+.panelset[
+
+.panel[.panel-name[Write Up]
+
+We conducted two independent samples t-test was conducted to determine if self-rated physical health and self-rated mental health among U.S. adults differed from 2018 to 2021. The mean mental health in 2018 was 3.66 and in 2021 was 3.48. The difference, 0.18, was found to be statistically significant, p < 0.001. The mean physical health score in 2018 was 3.34 and in 2021 3.33. The difference, 0.01, was not found to be statistically significant p = 0.78.
+
+
+]<!-- end of panel -->
+.panel[.panel-name[Limitations]
+
+* Possible violation of t-test assumption
+
+* Survey methodology
+
+* Generalizability (overgeneralization)
+
+]<!-- end of panel -->
+.panel[.panel-name[Future implications]
+
+Future research should investigate how mental health and physical health changed over time among subpopulations such as gender, race, ethnicity, and SES. 
+
+]<!-- end of panel -->
+
+]
+
+---
+
+# This presentation was made using:
+
+<!-- start of panel set -->
+.panelset[
+
+.panel[.panel-name[Rstudio]
+
+
+#### What is it? 
+
+RStudio is an Integrated Development Environment for R, a programming language for statistical computing and graphics. It is available in two formats: 1) RStudio Desktop which you can download on your personal computer and 2) Rstudio Server 
+
+#### Where can I learn more?
+
+[Dr. Audrey Leroux](https://education.gsu.edu/profile/audrey-leroux/), assistant professor of research in the College of Education at GSU  teaches R programming in the course EPRS 8600 Computer Use in Education. If you are a GSU student and would like to learn how to analyze data in R, consider enrolling in the course!
+
+[Dr. Andrew Heiss](https://aysps.gsu.edu/profile/andrew-heiss/) is an assistant professor in the Andrew Young School of Policy Studies at Georgia State University, as well as a certified [R/Rstudio instructor](https://education.rstudio.com/trainers/people/heiss+andrew/). He teaches R programming in his courses such as PMAP 8101 Data Visualization and PMAP 8521 Evaluation Research. Best of all, Dr. Heiss has made his [entire teaching catalog](https://www.andrewheiss.com/teaching/) available online for FREE, meaning you can access his content on R programming without having to enroll in his course!
+
+
+]<!-- end of panel -->
+.panel[.panel-name[Xaringan]
+
+Xaringan (pronounced "Sharingan") is a package within R that allows you to make HTML presentations. If you have ever used Microsoft Powerpoint before, then Xaringan serves a similar purpose but with additional capabilities. If you'd like to learn more about Xaringan, below are some helpful resources:
+
+- a [blog post](http://svmiller.com/blog/2018/02/r-markdown-xaringan-theme/) on how to use Xaringan
+- a [video workshop](https://www.youtube.com/watch?v=M3skTMQbCD0&t=2099s) on how to use Xaringan (part 1)
+- a [video workshop](https://www.youtube.com/watch?v=cAtpZxW4bTI) on how to use Xaringan (part 2)
+
+]
+
+]
+
+---
+
+# About the researchers
+
+<!-- start of panel set -->
+.panelset[
+
+.panel[.panel-name[James Malloy]
+
+![](img/J Malloy Headshot2.jpg)
+
+
+James is a graduate student at Georgia State University earning his M.S. in Educational Research. Born and raised in the small town of Goldsboro, North Carolina, 
+
+James earned his Bachelor's degree in Spanish as well as a Master of Arts in Teaching, both from the University of North Carolina at Chapel Hill. Upon graduating, James taught high school Spanish for 5 years and later went on to help underserved high school students gain admission to College at the non-profit, the Emily K Center. In 2021, James officially moved to the Metro Atlanta area to finish his degree program. James is fiercely passionate about equity in education and explores the uses of quantitative research methods and storytelling to achieve that goal.  
+
+
+]<!-- end of panel -->
+
+.panel[.panel-name[Patrice Powell]
+
+Patrice is a ...
+
+]<!-- end of panel -->
+
+
+]
+
+---
+
