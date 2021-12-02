@@ -30,9 +30,11 @@ class: title-slide, left, bottom
 ---
 class: inverse, center, middle
 
+# Topic: Self-rated health
+
 # Field: Health research
 
-## Topic: Self-rated health
+# Data: GSS 2018 &amp; 2021
 
 ---
 
@@ -42,9 +44,11 @@ class: inverse, center, middle
 
 ### What is it?
 
-Self-rated health refers the question in which participants assess different dimensions of their own health; it is commonly used in health research.
+Self-rated health refers to the question where participants rate different dimensions of their own health; it is commonly used in health research.
 
 ]
+
+--
 
 .pull-right[
 
@@ -53,22 +57,22 @@ Self-rated health refers the question in which participants assess different dim
 
 #### On a scale from 1-5, how would you rate your physical (or mental) health?
 
-1. Poor
+**5. Excellent**
 
-2. Fair
+**4. Very good**
 
-3. Good
+**3. Good**
 
-4. Very Good
+**2. Fair**
 
-5. Excellent
+**1. Poor**
 
 ]
 
 ---
 class: inverse, center, middle
 
-# Why is it important?
+# Why is self-rated health important?
 
 ---
 # Relevance
@@ -190,52 +194,31 @@ class: inverse, center, middle
 ]
 
 ---
-class: inverse, top
+class: inverse, center
 
 # What's the takeaway from all that?
 
-
 --
-
 
 .left[
-
-
-### If you ask people to self-rate their health (poor, fair, good, etc)...
-
-
+### If we ask people to self-rate their health...
 ]
-
 
 --
 
+.left[
+### then we can use their answers to predict things like their mortality
+]
+--
 
-.right[
-
-
-### then you can "predict" things like their health, income, and even mortality
-
-
+.left[
+### and if we  know who is at risk of early mortality...
 ]
 
 --
 
 .center[
-
-
-### and if you can predict who is likely to have  poor health, low-income, or early mortality
-
-
-]
-
-
-
---
-
-.center[
-
 # **then we can do something beforehand to prevent it!!!!**
-
 ]
 
 ---
@@ -312,9 +295,18 @@ class: inverse, top
 
 class: inverse, center, middle
 
-#Research Question 
+# Our hypothesis:
 
-## Is there a difference in the U.S. national self-rated physical and mental health averages in 2018 vs 2020?
+## The Covid-19 pandemic impacted people's physical and mental health.
+
+---
+
+class: inverse, center, middle
+
+
+# Our research question: 
+
+## Is there a significant difference in the averages for self-rated physical and mental health in 2018 vs 2021?
 
 ---
 
@@ -328,6 +320,8 @@ class: center
 .panel[.panel-name[Physical '18]
   
 ![](GROUP-PRESENTATION-EPRS-8530_files/figure-html/physical-health-201-1.png)&lt;!-- --&gt;
+
+M = 
 
 ] &lt;!-- end of panel --&gt;
 .panel[.panel-name[Physical '21]
@@ -355,7 +349,7 @@ class: center
 ---
 class: inverse, center, middle
 
-# Is this statistically significant??
+# Are these differences statistically significant??
 
 ---
 
@@ -365,10 +359,6 @@ class: inverse, center, middle
 
 .panelset[
 
-.panel[.panel-name[Levene's Test]
-
-
-] &lt;!-- end of panel --&gt;
 .panel[.panel-name[Statistical method]
 
 ### **Independent samples ttest**
@@ -409,21 +399,23 @@ class: inverse, center, middle
 ] &lt;!-- end of panel --&gt;
 .panel[.panel-name[Hypothesis testing]
 
-H_0: \mu_1 - \mu_2 = 0
+###**Null hypothesis**: 
 
-**Null hypothesis**: There is no difference in mean averages in 2018 and 2021.
+* There is no difference in mean averages in 2018 and 2021.
 
-H_1: \mu_1 - \mu_2 \neq 0
+### **Alternate hypothesis**: 
 
-**Alternate hypothesis**: There is a difference in mean averages in 2018 and 2021
+* There is a difference in mean averages in 2018 and 2021.
 
-**alpha level**: 0.05
+### **Test type**
 
-**type**: two-tailed
+* two-tailed
 
+### **Alpha level**
+
+* 0.05
 
 ] &lt;!-- end of panel --&gt;
-
 ]
 
 ---
@@ -440,9 +432,9 @@ class: inverse, center, middle
 &lt;table&gt;
  &lt;thead&gt;
   &lt;tr&gt;
-   &lt;th style="text-align:right;"&gt; estimate &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; estimate1 &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; estimate2 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; difference &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2018 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2021 &lt;/th&gt;
    &lt;th style="text-align:right;"&gt; statistic &lt;/th&gt;
    &lt;th style="text-align:right;"&gt; p.value &lt;/th&gt;
    &lt;th style="text-align:right;"&gt; parameter &lt;/th&gt;
@@ -482,9 +474,9 @@ class: inverse, center, middle
 &lt;table&gt;
  &lt;thead&gt;
   &lt;tr&gt;
-   &lt;th style="text-align:right;"&gt; estimate &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; estimate1 &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; estimate2 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; difference &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2018 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; 2021 &lt;/th&gt;
    &lt;th style="text-align:right;"&gt; statistic &lt;/th&gt;
    &lt;th style="text-align:right;"&gt; p.value &lt;/th&gt;
    &lt;th style="text-align:right;"&gt; parameter &lt;/th&gt;
@@ -528,7 +520,7 @@ class: inverse, center, middle
 
 .panel[.panel-name[Write Up]
 
-We conducted two independent samples t-test was conducted to determine if self-rated physical health and self-rated mental health among U.S. adults differed from 2018 to 2021. The mean mental health in 2018 was 3.66 and in 2021 was 3.48. The difference, 0.18, was found to be statistically significant, p &lt; 0.001. The mean physical health score in 2018 was 3.34 and in 2021 3.33. The difference, 0.01, was not found to be statistically significant p = 0.78.
+We conducted two independent samples t-tests to determine if self-rated physical and mental health among U.S. adults differed in 2018 vs 2021. We found there to be a statistically significant difference for mental health (p &lt; 0.001). However, we did not find there to be a statistically significant difference for physical health (p = 0.78).
 
 
 ]&lt;!-- end of panel --&gt;
@@ -537,11 +529,6 @@ We conducted two independent samples t-test was conducted to determine if self-r
 * Possible violation of t-test assumption
 
 * Survey methodology
-
-* Overgeneralization
-
-* Lack of qualitative methods
-
 
 ]&lt;!-- end of panel --&gt;
 .panel[.panel-name[Future implications]
@@ -554,17 +541,23 @@ Future research should investigate how mental health and physical health changed
 
 ---
 
+background-image:url(https://jrossrecruiters.com/sites/default/files/styles/blog_promoted_image/public/field/image/any-questions.jpg?itok=6THzQGhb)
+
+background-size:cover
+
+---
+
 # This presentation was made using:
 
 &lt;!-- start of panel set --&gt;
 .panelset[
 
-.panel[.panel-name[Rstudio]
+.panel[.panel-name[R programming]
 
 
 #### What is it? 
 
-RStudio is an Integrated Development Environment for R, a programming language for statistical computing and graphics. It is available in two formats: 1) RStudio Desktop which you can download on your personal computer and 2) Rstudio Server 
+R is a programming language for statistical computing and graphics that you can use to clean, analyze, and graph your data. It is widely used by researchers from diverse disciplines to estimate and display results and by teachers of statistics and research methods. Most importantly, it's completely free!
 
 #### Where can I learn more?
 
@@ -578,12 +571,11 @@ RStudio is an Integrated Development Environment for R, a programming language f
 
 Xaringan (pronounced "Sharingan") is a package within R that allows you to make HTML presentations. If you have ever used Microsoft Powerpoint before, then Xaringan serves a similar purpose but with additional capabilities. If you'd like to learn more about Xaringan, below are some helpful resources:
 
-- a [blog post](http://svmiller.com/blog/2018/02/r-markdown-xaringan-theme/) on how to use Xaringan
+- a [brief guide](https://bookdown.org/yihui/rmarkdown/xaringan.html) on how to use Xaringan
 - a [video workshop](https://www.youtube.com/watch?v=M3skTMQbCD0&amp;t=2099s) on how to use Xaringan (part 1)
 - a [video workshop](https://www.youtube.com/watch?v=cAtpZxW4bTI) on how to use Xaringan (part 2)
 
-]
-
+]&lt;!-- end of panel --&gt;
 ]
 
 ---
@@ -597,10 +589,7 @@ Xaringan (pronounced "Sharingan") is a package within R that allows you to make 
 
 ![](img/J Malloy Headshot2.jpg)
 
-
-James is a graduate student at Georgia State University earning his M.S. in Educational Research. Born and raised in the small town of Goldsboro, North Carolina, 
-
-James earned his Bachelor's degree in Spanish as well as a Master of Arts in Teaching, both from the University of North Carolina at Chapel Hill. Upon graduating, James taught high school Spanish for 5 years and later went on to help underserved high school students gain admission to College at the non-profit, the Emily K Center. In 2021, James officially moved to the Metro Atlanta area to finish his degree program. James is fiercely passionate about equity in education and explores the uses of quantitative research methods and storytelling to achieve that goal.  
+James is a graduate student at Georgia State University earning his M.S. in Research, Measurement, and Statistics. Prior to moving to Atlanta, James lived in North Carolina where he was was born and raised. He earned his Bachelor's degree in Spanish as well as a Master of Arts in Teaching, both from the University of North Carolina at Chapel Hill. After graduating, he taught high school Spanish for 5 years and later went on to help underserved high school students gain admission to College. James is fiercely passionate about equity in education and uses quantitative research methods to tell stories and make a meaningful impact on society. When he's not conducting research, James enjoys traveling, having interesting one on one conversations, and practicing his language skills. 
 
 
 ]&lt;!-- end of panel --&gt;
@@ -613,8 +602,6 @@ Patrice is a ...
 
 
 ]
-
----
 
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
