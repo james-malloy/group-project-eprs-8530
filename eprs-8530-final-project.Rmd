@@ -22,20 +22,23 @@ editor_options:
   chunk_output_type: inline
 ---
 ```{r setup, include = FALSE, echo= FALSE, message=FALSE, warning=FALSE}
-library(knitr)
-library(tidyverse)
+library(knitr) # for knitting
+library(tidyverse) # ggplot and friends
 library(NHSRtheme) # slide template comes from here
-library(haven)
-library(broom)
-library(kableExtra) # makes data frames tidy when you knit
-library(DT) # datatable package
-library(gt) # grammar of tables package
-library(xaringanExtra)
-library(psych)
-library(ggridges)
-xaringanExtra::use_panelset()
+library(haven) # calling stata files
+library(broom) # tidy function to make data tidy
+library(kableExtra) # makes data frames pretty when you knit
+library(psych) # descriptive stats
+library(xaringanExtra) 
+use_panelset() # function to make panel sets
 
-# set default options
+# xaringan::inf_mr() 
+    # if you run the above command directly in the Rstudio console, it will let 
+    # you see your presentation slides in the rstudio "viewer" panel every time 
+    # you edit the markdown file. Otherwise, you have to constantly knit to 
+    # browser to see your edits render.
+
+# tried setting default options for image size but struggled a lot with this part
 opts_chunk$set(echo = FALSE,
                fig.width = 6,
                fig.height = 3,
@@ -50,6 +53,10 @@ scale_colour_discrete <- partial(scale_colour_nhs, discrete = TRUE)
 theme_update(plot.title = element_text(hjust = 0.5)) # centers plot titles
 theme_update(plot.subtitle = element_text(hjust = 0.5)) # centers subtitles
 
+```
+
+
+```{r load-and-prep data}
 gss21_raw <- read_stata("data/gss21.dta") 
 
 gss21 <- gss21_raw%>% 
@@ -62,6 +69,7 @@ gss18 <- gss18_raw%>%
   select(id, year, sex, hlthmntl, hlthphys) %>% 
   na.omit(hlthphys)
 
+# merge gss 2018 & 2018
 gss_merged <- rbind(gss18, gss21) %>% 
   mutate(year = as.factor(year)) %>%       # Make year be numeric
   mutate(mental_health =                   # Create new variable `mental_health`
@@ -72,7 +80,7 @@ gss_merged <- rbind(gss18, gss21) %>%
                                   ifelse(hlthmntl == 4, 2, 
                                          ifelse(hlthmntl == 5, 1, ""
                                          ))))))) %>% 
-  mutate(physical_health = 
+  mutate(physical_health =  # there's probably a better way to do this
            as.numeric(
              ifelse(hlthphys == 1, 5,
                     ifelse(hlthphys == 2, 4,
@@ -115,6 +123,7 @@ health_by_year <- gss_merged %>%
   mutate(mental_health = "mental health",
          physical_health = "physical health",
          yeargroup = ifelse(year == "2018", "2018","2021"))
+
 ```
 
 class: title-slide, left, bottom
@@ -128,9 +137,11 @@ class: title-slide, left, bottom
 ---
 class: inverse, center, middle
 
+# Topic: Self-rated health
+
 # Field: Health research
 
-## Topic: Self-rated health
+# Data: GSS 2018 & 2021
 
 ---
 
@@ -140,9 +151,11 @@ class: inverse, center, middle
 
 ### What is it?
 
-Self-rated health refers the question in which participants assess different dimensions of their own health; it is commonly used in health research.
+Self-rated health refers to the question where participants rate different dimensions of their own health; it is commonly used in health research.
 
 ]
+
+--
 
 .pull-right[
 
@@ -151,22 +164,22 @@ Self-rated health refers the question in which participants assess different dim
 
 #### On a scale from 1-5, how would you rate your physical (or mental) health?
 
-1. Poor
+**5. Excellent**
 
-2. Fair
+**4. Very good**
 
-3. Good
+**3. Good**
 
-4. Very Good
+**2. Fair**
 
-5. Excellent
+**1. Poor**
 
 ]
 
 ---
 class: inverse, center, middle
 
-# Why is it important?
+# Why is self-rated health important?
 
 ---
 # Relevance
@@ -213,8 +226,6 @@ ggplot(gss18_correlations, aes(y = educ,
   labs(x = "Mental health",
        y = "Education",
        subtitle = "GSS 2018")
-  
-
 ```
 
 ]
@@ -313,52 +324,31 @@ ggplot(mental_health_by_race, aes(y = mean_mental_health,
 ]
 
 ---
-class: inverse, top
+class: inverse, center
 
 # What's the takeaway from all that?
 
-
 --
-
 
 .left[
-
-
-### If you ask people to self-rate their health (poor, fair, good, etc)...
-
-
+### If we ask people to self-rate their health...
 ]
-
 
 --
 
+.left[
+### then we can use their answers to predict things like their mortality...
+]
+--
 
-.right[
-
-
-### then you can "predict" things like their health, income, and even mortality
-
-
+.left[
+### and if we  know who is at risk of early mortality...
 ]
 
 --
 
 .center[
-
-
-### and if you can predict who is likely to have  poor health, low-income, or early mortality
-
-
-]
-
-
-
---
-
-.center[
-
 # **then we can do something beforehand to prevent it!!!!**
-
 ]
 
 ---
@@ -398,9 +388,9 @@ class: inverse, top
 #   labs(y = "Physical health")
 
 ggplot(filter(gss_merged, year == 2018), aes(x = physical_health)) +
-  geom_bar(fill = "blue") +
+  geom_bar(fill = "red") +
   geom_vline(xintercept = 3.34, size = 1.5) +
-  labs(subtitle = "GSS 2018",
+  labs(subtitle = "Physical health",
        xlab = "")
 ```
 
@@ -450,9 +440,9 @@ ggplot(filter(gss_merged, year == 2018), aes(x = physical_health)) +
 
 
 ggplot(filter(gss_merged, year == 2018), aes(x = mental_health)) +
-  geom_bar(fill = "red") +
+  geom_bar(fill = "blue") +
   geom_vline(xintercept = 3.66, size = 1.5) +
-  labs(subtitle = "GSS 2018",
+  labs(subtitle = "Mental health",
        xlab = "")
 
 ```
@@ -473,9 +463,18 @@ ggplot(filter(gss_merged, year == 2018), aes(x = mental_health)) +
 
 class: inverse, center, middle
 
-#Research Question 
+# Our hypothesis:
 
-## Is there a difference in the U.S. national self-rated physical and mental health averages in 2018 vs 2020?
+## The Covid-19 pandemic impacted people's physical and mental health.
+
+---
+
+class: inverse, center, middle
+
+
+# Our research question: 
+
+## Is there a significant difference in the averages for self-rated physical and mental health in 2018 vs 2021?
 
 ---
 
@@ -488,7 +487,8 @@ class: center
 
 .panel[.panel-name[Physical '18]
   
-```{r physical-health-201, fig.height=2.25, fig.width=3.75, dpi=200}
+```{r physical-health-201, fig.height=2.25, fig.width=3.75, dpi=200, warning=FALSE, message=FALSE}
+
 ggplot(health_by_year, aes(x = year, 
                            y = avg_phys_health,
                            color = physical_health,
@@ -496,8 +496,12 @@ ggplot(health_by_year, aes(x = year,
   annotate("point", x = 2018, y = 3.335481, size = 2, color = "red") +
   xlim(2017, 2021)+
   ylim(3.25, 3.4) +
-  labs(y = "Average")
+  labs(title = "Average physical health for U.S. adults",
+       subtitle = "2018",
+       y = "average")
 ```
+
+M = 
 
 ] <!-- end of panel -->
 .panel[.panel-name[Physical '21]
@@ -512,7 +516,9 @@ ggplot(health_by_year, aes(x = year,
   geom_point(size = 2, color = "red") +
   geom_line(color = "red") +
   ylim(3.25, 3.4) +
-  labs(y = "Average")
+  labs(title = "Average physical health for U.S. adults",
+       subtitle = "2018 vs 2021",
+       y = "Average")
 ```
 
 ] <!-- end of panel -->
@@ -526,7 +532,9 @@ ggplot(health_by_year, aes(x = year,
   annotate("point", x = 2018, y = 3.661942, size = 2, color = "blue") +
   xlim(2017, 2021) +
   ylim(3,4) +
-  labs(y = "Average")
+  labs(title = "Average mental health for U.S. adults",
+       subtitle = "2018",
+       y = "average")
 
 ```
 
@@ -542,7 +550,9 @@ ggplot(health_by_year, aes(x = year,
   geom_point(size = 2, color = "blue") +
   geom_line(color = "blue") +
   ylim(3, 4) +
-  labs(y = "Average") 
+  labs(title = "Average mental health for U.S. adults",
+       subtitle = "2018 vs 2021",
+       y = "average") 
   
 
 ```
@@ -553,21 +563,26 @@ ggplot(health_by_year, aes(x = year,
 ```{r full-plot, echo=FALSE, message=FALSE , fig.height=2.25, fig.width=3.75, dpi=200}
 
 ggplot(health_by_year, aes(x = year, 
-                           y = avg_mntl_health, 
-                           color = mental_health,
-                           group = yeargroup)) +
+                           y = avg_mntl_health)) +
   annotate("point", x = 2018, y = 3.661942, size = 2, color = "blue" ) +
   annotate("point", x = 2021, y = 3.484899, size = 2, color = "blue") +
   annotate("point", x = 2018, y = 3.335481, size = 2, color = "red") +
   annotate("point", x = 2021, y = 3.327515, size = 2, color = "red") +
-  annotate("segment", x = 2018, xend = 2021, y = 3.661942, yend = 3.484899, color = "blue") +
-  annotate("segment", x = 2018, xend = 2021, y = 3.335481, yend = 3.327515, color = "red") +
+  annotate("segment", 
+           x = 2018, xend = 2021, 
+           y = 3.661942, yend = 3.484899, 
+           color = "blue") +
+  annotate("segment", 
+           x = 2018, xend = 2021, 
+           y = 3.335481, yend = 3.327515, 
+           color = "red") +
   scale_x_discrete(labels=c("2018","2021")) +  ## trying to add 2021 to tick label, not working
   geom_vline(xintercept = 2019.5, ) +
   xlim(2016, 2023) +
   ylim(3, 4) +
-  labs(y = "Average")
-
+  labs(title= "Physical and mental health",
+       subtitle = "2018 vs 2021",
+       y = "average")
 ```
 
 ]<!-- end of panel -->
@@ -576,7 +591,7 @@ ggplot(health_by_year, aes(x = year,
 ---
 class: inverse, center, middle
 
-# Is this statistically significant??
+# Are these differences statistically significant??
 
 ---
 
@@ -586,10 +601,6 @@ class: inverse, center, middle
 
 .panelset[
 
-.panel[.panel-name[Levene's Test]
-
-
-] <!-- end of panel -->
 .panel[.panel-name[Statistical method]
 
 ### **Independent samples ttest**
@@ -630,21 +641,23 @@ class: inverse, center, middle
 ] <!-- end of panel -->
 .panel[.panel-name[Hypothesis testing]
 
-H_0: \mu_1 - \mu_2 = 0
+###**Null hypothesis**: 
 
-**Null hypothesis**: There is no difference in mean averages in 2018 and 2021.
+* There is no difference in mean averages in 2018 and 2021.
 
-H_1: \mu_1 - \mu_2 \neq 0
+### **Alternate hypothesis**: 
 
-**Alternate hypothesis**: There is a difference in mean averages in 2018 and 2021
+* There is a difference in mean averages in 2018 and 2021.
 
-**alpha level**: 0.05
+### **Test type**
 
-**type**: two-tailed
+* two-tailed
 
+### **Alpha level**
+
+* 0.05
 
 ] <!-- end of panel -->
-
 ]
 
 ---
@@ -660,7 +673,10 @@ class: inverse, center, middle
 
 ```{r findings-mental, echo=FALSE, warning=FALSE, message=FALSE}
 
-tidy(t.test(mental_health ~ year, data = gss_merged)) %>% 
+tidy(t.test(mental_health ~ year, data = gss_merged))  %>% 
+  rename("difference" = "estimate",
+         "2018" = "estimate1",
+         "2021" = "estimate2") %>% 
   kable(digits = 2, format = "html")
 
 ```
@@ -675,7 +691,8 @@ ggplot(health_by_year, aes(x = year,
   geom_point(size = 2, color = "blue") +
   geom_line(color = "blue") +
   ylim(3, 4) +
-  labs(y = "Average") 
+  labs(subtitle = "Mental health",
+       y = "average") 
   
 ```
 
@@ -690,6 +707,9 @@ ggplot(health_by_year, aes(x = year,
 ```{r findings-physical, echo=FALSE, warning=FALSE, message=TRUE}
 
 tidy(t.test(physical_health ~ year, data = gss_merged)) %>% 
+  rename("difference" = "estimate",
+         "2018" = "estimate1",
+         "2021" = "estimate2") %>% 
   kable(digits = 2, format = "html")
 ```
 
@@ -704,7 +724,8 @@ ggplot(health_by_year, aes(x = year,
   geom_point(size = 2, color = "red") +
   geom_line(color = "red") +
   ylim(3.25, 3.4) +
-  labs(y = "Average")
+  labs(subtitle = "Physical health",
+       y = "average")
 ```
 
 ]
@@ -722,7 +743,7 @@ class: inverse, center, middle
 
 .panel[.panel-name[Write Up]
 
-We conducted two independent samples t-test was conducted to determine if self-rated physical health and self-rated mental health among U.S. adults differed from 2018 to 2021. The mean mental health in 2018 was 3.66 and in 2021 was 3.48. The difference, 0.18, was found to be statistically significant, p < 0.001. The mean physical health score in 2018 was 3.34 and in 2021 3.33. The difference, 0.01, was not found to be statistically significant p = 0.78.
+We conducted two independent samples t-tests to determine if self-rated physical and mental health among U.S. adults differed in 2018 vs 2021. We found there to be a statistically significant difference for mental health (p < 0.001). However, we did not find there to be a statistically significant difference for physical health (p = 0.78).
 
 
 ]<!-- end of panel -->
@@ -731,8 +752,6 @@ We conducted two independent samples t-test was conducted to determine if self-r
 * Possible violation of t-test assumption
 
 * Survey methodology
-
-* Generalizability (overgeneralization)
 
 ]<!-- end of panel -->
 .panel[.panel-name[Future implications]
@@ -745,17 +764,23 @@ Future research should investigate how mental health and physical health changed
 
 ---
 
+background-image:url(https://jrossrecruiters.com/sites/default/files/styles/blog_promoted_image/public/field/image/any-questions.jpg?itok=6THzQGhb)
+
+background-size:cover
+
+---
+
 # This presentation was made using:
 
 <!-- start of panel set -->
 .panelset[
 
-.panel[.panel-name[Rstudio]
+.panel[.panel-name[R programming]
 
 
 #### What is it? 
 
-RStudio is an Integrated Development Environment for R, a programming language for statistical computing and graphics. It is available in two formats: 1) RStudio Desktop which you can download on your personal computer and 2) Rstudio Server 
+R is a programming language for statistical computing and graphics that you can use to clean, analyze, and graph your data. It is widely used by researchers from diverse disciplines to estimate and display results and by teachers of statistics and research methods. Most importantly, it's completely free!
 
 #### Where can I learn more?
 
@@ -769,41 +794,23 @@ RStudio is an Integrated Development Environment for R, a programming language f
 
 Xaringan (pronounced "Sharingan") is a package within R that allows you to make HTML presentations. If you have ever used Microsoft Powerpoint before, then Xaringan serves a similar purpose but with additional capabilities. If you'd like to learn more about Xaringan, below are some helpful resources:
 
-- a [blog post](http://svmiller.com/blog/2018/02/r-markdown-xaringan-theme/) on how to use Xaringan
+- a [brief guide](https://bookdown.org/yihui/rmarkdown/xaringan.html) on how to use Xaringan
 - a [video workshop](https://www.youtube.com/watch?v=M3skTMQbCD0&t=2099s) on how to use Xaringan (part 1)
 - a [video workshop](https://www.youtube.com/watch?v=cAtpZxW4bTI) on how to use Xaringan (part 2)
 
-]
+]<!-- end of panel -->
 
+.panel[.panel-name[Citations]
+
+Lorem, G., Cook, S., Leon, D.A. et al. Self-reported health as a predictor of mortality: A cohort study of its relation to other health measurements and observation time. Sci Rep 10, 4886 (2020). https://doi.org/10.1038/s41598-020-61603-0
+
+]<!-- end of panel -->
 ]
 
 ---
 
-# About the researchers
-
-<!-- start of panel set -->
-.panelset[
-
-.panel[.panel-name[James Malloy]
+# About me
 
 ![](img/J Malloy Headshot2.jpg)
 
-
-James is a graduate student at Georgia State University earning his M.S. in Educational Research. Born and raised in the small town of Goldsboro, North Carolina, 
-
-James earned his Bachelor's degree in Spanish as well as a Master of Arts in Teaching, both from the University of North Carolina at Chapel Hill. Upon graduating, James taught high school Spanish for 5 years and later went on to help underserved high school students gain admission to College at the non-profit, the Emily K Center. In 2021, James officially moved to the Metro Atlanta area to finish his degree program. James is fiercely passionate about equity in education and explores the uses of quantitative research methods and storytelling to achieve that goal.  
-
-
-]<!-- end of panel -->
-
-.panel[.panel-name[Patrice Powell]
-
-Patrice is a ...
-
-]<!-- end of panel -->
-
-
-]
-
----
-
+James is a graduate student at Georgia State University earning his M.S. in Research, Measurement, and Statistics. Prior to this, James lived and worked in his home state of North Carolina. He earned his Bachelor's degree in Spanish as well as a Master of Arts in Teaching both from the University of North Carolina at Chapel Hill. After graduating, he taught high school Spanish for 5 years and later went on to help underserved high school students gain admission to College. James is fiercely passionate about equity in education and uses quantitative research methods to tell stories and make a meaningful impact on society. When he's not conducting research, James enjoys traveling, having interesting one on one conversations, and practicing his language skills.
